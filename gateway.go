@@ -107,7 +107,7 @@ func invertStringMap(in map[string]string) map[string]string {
 }
 
 //createActionHandlers create actionHanler for each action with the prefixPath.
-func createActionHandlers(route map[string]interface{}, actions []string) []*actionHandler {
+func createActionHandlers(route map[string]interface{}, actions map[string]string) []*actionHandler {
 	routePath := route["path"].(string)
 	mappingPolicy, exists := route["mappingPolicy"].(string)
 	if !exists {
@@ -119,13 +119,13 @@ func createActionHandlers(route map[string]interface{}, actions []string) []*act
 	}
 	actionToAlias := invertStringMap(aliases)
 
-	result := []*actionHandler{}
-	for _, action := range actions {
+	var result []*actionHandler
+	for action, version := range actions {
 		actionAlias, exists := actionToAlias[action]
 		if !exists && mappingPolicy == "restrict" {
 			continue
 		}
-		result = append(result, &actionHandler{alias: actionAlias, routePath: routePath, action: action})
+		result = append(result, &actionHandler{alias: actionAlias, routePath: routePath, action: action, version: version})
 	}
 	return result
 }
@@ -149,18 +149,19 @@ func filterActions(context moleculer.Context, settings map[string]interface{}, s
 	result := []*actionHandler{}
 	routes := settings["routes"].([]map[string]interface{})
 	for _, route := range routes {
-		filteredActions := []string{}
+		filteredActions := map[string]string{}
 		_, exists := route["whitelist"]
 		whitelist := []string{"**"}
 		if exists {
 			whitelist = route["whitelist"].([]string)
 		}
 		for _, service := range services {
+			version := service["version"].(string)
 			actions := service["actions"].(map[string]map[string]interface{})
 			for _, action := range actions {
 				actionFullName := action["name"].(string)
 				if shouldInclude(whitelist, actionFullName) {
-					filteredActions = append(filteredActions, actionFullName)
+					filteredActions[actionFullName] = version
 				}
 			}
 		}

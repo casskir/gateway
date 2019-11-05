@@ -14,6 +14,7 @@ type actionHandler struct {
 	routePath            string
 	alias                string
 	action               string
+	version              string
 	context              moleculer.Context
 	acceptedMethodsCache map[string]bool
 }
@@ -37,12 +38,18 @@ func (handler *actionHandler) aliasPath() string {
 
 // pattern return the path pattern used to map URL in the http.ServeMux
 func (handler *actionHandler) pattern() string {
-	actionPath := strings.Replace(handler.action, ".", "/", -1)
 	fullPath := ""
 	aliasPath := handler.aliasPath()
 	if aliasPath != "" {
 		fullPath = fmt.Sprint(handler.routePath, "/", aliasPath)
 	} else {
+		actionPath := ""
+		if handler.version == "" {
+			actionPath = strings.Replace(handler.action, ".", "/", -1)
+		} else {
+			vLen := len(handler.version)
+			actionPath = handler.action[:vLen] + strings.Replace(handler.action[vLen:], ".", "/", -1)
+		}
 		fullPath = fmt.Sprint(handler.routePath, "/", actionPath)
 	}
 	return strings.Replace(fullPath, "//", "/", -1)
