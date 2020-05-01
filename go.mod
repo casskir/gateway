@@ -12,4 +12,4 @@ require (
 	github.com/tidwall/gjson v1.2.1
 )
 
-replace github.com/moleculer-go/moleculer v0.2.2-0.20200311085233-18a249e61c6b => github.com/casskir/moleculer v0.1.6-0.20200318104036-2046a609922a
+replace github.com/moleculer-go/moleculer v0.2.2-0.20200311085233-18a249e61c6b => github.com/casskir/moleculer v0.1.6-0.20200501235223-556df7e21e5c
